@@ -24,7 +24,6 @@ type Resolver struct {
 	prefixMap     map[string]*graphql.Object
 	interfaceMap  map[string]*graphql.Interface
 	handlerSchema graphql.Schema
-	// rawSchema string
 }
 
 // NewResolver returns a resolver configured with the given logger
