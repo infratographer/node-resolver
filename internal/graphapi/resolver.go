@@ -8,13 +8,14 @@ import (
 
 	"github.com/graphql-go/graphql"
 	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
 	"github.com/vektah/gqlparser/v2/ast"
 	"github.com/vektah/gqlparser/v2/parser"
 	"go.infratographer.com/x/gidx"
 
 	"go.uber.org/zap"
 )
+
+var ErrMissingNodeInterface = errors.New("interface for Node missing from schema")
 
 // Resolver provides a graph response resolver
 type Resolver struct {
@@ -80,8 +81,13 @@ func NewResolver(logger *zap.SugaredLogger, rawSchema string) (*Resolver, error)
 		r.prefixMap[prefix] = graphTypeFor(obj.Name, ifaces)
 	}
 
+	q, err := r.Query()
+	if err != nil {
+		return nil, err
+	}
+
 	r.handlerSchema, err = graphql.NewSchema(graphql.SchemaConfig{
-		Query: r.Query(),
+		Query: q,
 		Types: r.GraphTypes(),
 	})
 	if err != nil {
@@ -130,12 +136,17 @@ func graphInterfaceFor(name string) *graphql.Interface {
 	})
 }
 
-func (r *Resolver) Query() *graphql.Object {
+func (r *Resolver) Query() (*graphql.Object, error) {
+	nodeInt, ok := r.interfaceMap["Node"]
+	if !ok {
+		return nil, ErrMissingNodeInterface
+	}
+
 	return graphql.NewObject(graphql.ObjectConfig{
 		Name: "Query",
 		Fields: graphql.Fields{
 			"node": &graphql.Field{
-				Type: r.interfaceMap["Node"],
+				Type: nodeInt,
 				Args: graphql.FieldConfigArgument{
 					"id": &graphql.ArgumentConfig{
 						Description: "ID of the node",
@@ -147,11 +158,11 @@ func (r *Resolver) Query() *graphql.Object {
 					if err != nil {
 						return nil, err
 					}
-					return r.GetNode(id), nil
+					return r.GetNode(id)
 				},
 			},
 		},
-	})
+	}), nil
 }
 
 func (r *Resolver) GraphTypes() []graphql.Type {
@@ -170,25 +181,21 @@ type postData struct {
 }
 
 func (r *Resolver) Routes(e *echo.Group) {
-	e.Use(middleware.BodyDump(func(ctx echo.Context, req, resp []byte) {
-		r.logger.Infow("body dump", "request", string(req))
-		r.logger.Infow("body dump", "response", string(resp))
-	}))
+	e.POST("/query", r.GraphHandler)
+}
 
-	e.POST("/graphql", func(c echo.Context) error {
-		var p postData
-		if err := json.NewDecoder(c.Request().Body).Decode(&p); err != nil {
-			return err
-		}
-		result := graphql.Do(graphql.Params{
-			Context:        c.Request().Context(),
-			Schema:         r.handlerSchema,
-			RequestString:  p.Query,
-			VariableValues: p.Variables,
-			OperationName:  p.Operation,
-		})
-
-		return c.JSON(http.StatusOK, result)
-		// return json.NewEncoder(w).Encode(result)
+func (r *Resolver) GraphHandler(ctx echo.Context) error {
+	var p postData
+	if err := json.NewDecoder(ctx.Request().Body).Decode(&p); err != nil {
+		return err
+	}
+	result := graphql.Do(graphql.Params{
+		Context:        ctx.Request().Context(),
+		Schema:         r.handlerSchema,
+		RequestString:  p.Query,
+		VariableValues: p.Variables,
+		OperationName:  p.Operation,
 	})
+
+	return ctx.JSON(http.StatusOK, result)
 }

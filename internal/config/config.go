@@ -10,8 +10,9 @@ import (
 
 // AppConfig stores all the config values for our application
 var AppConfig struct {
-	CRDB    crdbx.Config
-	Logging loggingx.Config
-	Server  echox.Config
-	Tracing otelx.Config
+	CRDB       crdbx.Config
+	Logging    loggingx.Config
+	Server     echox.Config
+	Tracing    otelx.Config
+	SchemaFile *string
 }
