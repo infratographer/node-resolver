@@ -3,6 +3,8 @@ package cmd
 import (
 	"context"
 	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -75,7 +77,19 @@ func serve(ctx context.Context) {
 
 	srv.AddHandler(r)
 
-	if err := srv.RunWithContext(ctx); err != nil {
-		logger.Errorw("failed to run server", "error", zap.Error(err))
+	shutdown := make(chan os.Signal, 1)
+	signal.Notify(shutdown, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
+
+	go func() {
+		if err := srv.Run(); err != nil {
+			logger.Fatal("failed to run server", zap.Error(err))
+		}
+	}()
+
+	select {
+	case <-shutdown:
+		logger.Info("signal caught, shutting down")
+	case <-ctx.Done():
+		logger.Info("context done, shutting down")
 	}
 }
