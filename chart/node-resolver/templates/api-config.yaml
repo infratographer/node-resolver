@@ -1,3 +1,4 @@
+---
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -5,6 +6,8 @@ metadata:
   labels:
     {{- include "common.labels.standard" . | nindent 4 }}
 data:
+  NODERESOLVER_SERVER_LISTEN: ":{{ .Values.api.listenPort }}"
+  NODERESOLVER_SERVER_SHUTDOWN_GRACE_PERIOD: "{{ .Values.api.shutdownGracePeriod }}"
 {{- if .Values.api.tracing.enabled }}
   NODERESOLVER_TRACING_ENABLED: "{{ .Values.api.tracing.enabled }}"
   NODERESOLVER_TRACING_PROVIDER: "{{ .Values.api.tracing.provider }}"

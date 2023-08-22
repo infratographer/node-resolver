@@ -36,7 +36,7 @@ api:
   extraAnnotations: {}
   extraEnvVars []:
   #- value: ""
-  #  name: NODERESOLVER_SOMETHING
+  #  name: NODERESOLVER_VAR
   resources: {}
   podSecurityContext: {}
   securityContext: {}
