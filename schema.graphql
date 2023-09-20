@@ -44,6 +44,11 @@ type Tenant implements Node & ResourceOwner
   @prefixedID(prefix: "tnntten") {
   id: ID!
 }
+type Project implements Node & ResourceOwner
+  @key(fields: "id")
+  @prefixedID(prefix: "metlprj") {
+  id: ID!
+}
 type Location implements Node & MetadataNode
   @key(fields: "id")
   @prefixedID(prefix: "lctnloc") {
