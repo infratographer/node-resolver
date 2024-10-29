@@ -56,5 +56,11 @@ type LoadBalancer implements Node & MetadataNode
   id: ID!
 }
 
+type PrivateInterface implements Node & IPAddressable
+  @key(fields: "id")
+  @prefixedID(prefix: "ecnsini") {
+  id: ID!  
+}
+
 extend schema
   @link(url: "https://specs.apollo.dev/federation/v2.3", import: ["@key"])
