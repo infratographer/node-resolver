@@ -87,6 +87,7 @@ func initConfig() {
 		logger.Infow("using config file",
 			"file", viper.ConfigFileUsed(),
 		)
+		setupAppConfig()
 	}
 }
 

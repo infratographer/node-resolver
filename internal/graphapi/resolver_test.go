@@ -106,9 +106,9 @@ func TestNodeResolving(t *testing.T) {
 		},
 		{
 			TestName:  "invalid prefix",
-			query:     `{"query": "{ node(id: \"invalidtest-987\") { __typename id } }" }`,
+			query:     `{"query": "{ node(id: \"i-987\") { __typename id } }" }`,
 			response:  `{"node":null}`,
-			errorMsgs: []string{"invalid id: expected prefix length is 7"},
+			errorMsgs: []string{"invalid id: expected prefix length is at least 2, 'i' is 1"},
 		},
 		{
 			TestName: "Entities request successful for known type",
