@@ -14,5 +14,5 @@ var AppConfig struct {
 	Logging    loggingx.Config
 	Server     echox.Config
 	Tracing    otelx.Config
-	SchemaFile *string
+	SchemaFile string `mapstructure:"schema"`
 }

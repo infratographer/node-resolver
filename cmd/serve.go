@@ -16,10 +16,7 @@ import (
 	"go.infratographer.com/node-resolver/internal/graphapi"
 )
 
-var (
-	defaultListenAddr = ":7904"
-	schemaFile        = ""
-)
+var defaultListenAddr = ":7904"
 
 var serveCmd = &cobra.Command{
 	Use:   "serve",
@@ -34,7 +31,7 @@ func init() {
 
 	echox.MustViperFlags(viper.GetViper(), serveCmd.Flags(), defaultListenAddr)
 
-	serveCmd.Flags().StringVar(&schemaFile, "schema", "", "path to graphql schema file")
+	serveCmd.Flags().String("schema", "", "path to graphql schema file")
 	viperx.MustBindFlag(viper.GetViper(), "schema", serveCmd.Flags().Lookup("schema"))
 }
 
@@ -47,8 +44,8 @@ func serve(ctx context.Context) {
 	srv, err := echox.NewServer(
 		logger.Desugar(),
 		echox.Config{
-			Listen:              viper.GetString("server.listen"),
-			ShutdownGracePeriod: viper.GetDuration("server.shutdown-grace-period"),
+			Listen:              config.AppConfig.Server.Listen,
+			ShutdownGracePeriod: config.AppConfig.Server.ShutdownGracePeriod,
 		},
 		versionx.BuildDetails(),
 	)
@@ -57,10 +54,10 @@ func serve(ctx context.Context) {
 	}
 
 	schema := defaultSchema
-	if schemaFile == "" {
+	if config.AppConfig.SchemaFile == "" {
 		logger.Warn("no schema file provided, starting with default schema")
 	} else {
-		schemaBytes, err := os.ReadFile(schemaFile)
+		schemaBytes, err := os.ReadFile(config.AppConfig.SchemaFile)
 		if err != nil {
 			logger.Fatalw("failed to read graphql schema file", "error", err)
 		}
