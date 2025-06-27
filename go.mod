@@ -12,7 +12,7 @@ require (
 	github.com/spf13/viper v1.20.1
 	github.com/stretchr/testify v1.10.0
 	github.com/vektah/gqlparser/v2 v2.5.28
-	go.infratographer.com/x v0.11.1
+	go.infratographer.com/x v0.11.4
 	go.uber.org/zap v1.27.0
 )
 
