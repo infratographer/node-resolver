@@ -2,7 +2,7 @@ module go.infratographer.com/node-resolver
 
 go 1.24.3
 
-toolchain go1.24.5
+toolchain go1.25.0
 
 require (
 	github.com/graphql-go/graphql v0.8.1
